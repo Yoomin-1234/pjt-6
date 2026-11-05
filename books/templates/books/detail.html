@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1 class="mb-4">도서 상세 페이지</h1>
+
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h3 class="fw-bold mb-0">{{ book.title }}</h3>
+    {% if book.category %}
+      <span class="badge border text-secondary px-3 py-2">{{ book.category.name }}</span>
+    {% endif %}
+  </div>
+
+  <p class="mt-3">{{ book.description }}</p>
+  <hr>
+  <p>회원 리뷰 평점 : {{ book.customer_review_rank }} / 10</p>
+  <hr>
+  <p>{{ book.author }}</p>
+  <hr>
+
+  <!-- F617: 도서를 작성한 사용자만 수정 링크 및 삭제 버튼 확인 가능 -->
+  {% if request.user == book.user %}
+    <div class="d-flex gap-2 mb-4">
+      <a href="{% url 'books:update' book.pk %}" class="btn btn-secondary btn-sm">UPDATE</a>
+      <form action="{% url 'books:delete' book.pk %}" method="POST" class="d-inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger btn-sm">DELETE</button>
+      </form>
+    </div>
+  {% endif %}
+
+  <!-- F617: 쓰레드 목록 및 작성 UI -->
+  <div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+    <h4 class="fw-bold mb-0">Thread</h4>
+    {% if request.user.is_authenticated %}
+      <a href="{% url 'books:thread_create' book.pk %}" class="text-decoration-none">쓰레드 작성</a>
+    {% endif %}
+  </div>
+
+  <ul class="list-unstyled mb-3">
+    {% for thread in threads %}
+      <li class="my-1">
+        <a href="{% url 'books:thread_detail' book.pk thread.pk %}">{{ thread.title }}</a>
+      </li>
+    {% empty %}
+      <li class="text-muted small">아직 작성된 쓰레드가 없습니다.</li>
+    {% endfor %}
+  </ul>
+
+  <hr>
+  <div class="mb-4">
+    <a href="{% url 'books:index' %}" class="btn btn-primary btn-sm">BACK</a>
+  </div>
+
+  <hr>
+
+  <!-- F625: AI 생성 작가 정보 및 안내 문구 -->
+  <div class="card p-4 my-3 bg-light border-0">
+    <div class="d-flex align-items-start gap-4">
+      {% if book.author_profile_img %}
+        <img
+          src="{{ book.author_profile_img }}"
+          alt="{{ book.author }}"
+          class="rounded-circle"
+          style="width: 100px; height: 100px; object-fit: cover;"
+        >
+      {% endif %}
+      <div>
+        <h4 class="fw-bold">{{ book.author }}</h4>
+        <p class="mb-2"><strong>대표작:</strong> {{ book.author_works }}</p>
+        <p class="mb-0">{{ book.author_info }}</p>
+      </div>
+    </div>
+  </div>
+  <p class="text-muted small">작가 대표작과 작가 정보는 AI가 생성한 정보로, 정확하지 않을 수 있습니다.</p>
+{% endblock content %}

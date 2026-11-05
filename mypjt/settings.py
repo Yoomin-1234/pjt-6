@@ -127,5 +127,9 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# 프로필 사진(F602) 및 쓰레드 커버 이미지(F626) 저장을 위한 Media 설정
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 AUTH_USER_MODEL = 'accounts.User'                 # F402: Custom User 모델 등록
 GMS_API_KEY = os.getenv('GMS_API_KEY', '')        # F417: GMS API Key 환경변수
