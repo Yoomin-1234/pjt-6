@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+  .signup-container {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .signup-card {
+    border: none;
+    border-radius: 16px;
+  }
+
+  .signup-card .form-control,
+  .signup-card .form-select {
+    min-height: 44px;
+    border-radius: 8px;
+  }
+
+  .category-section {
+    padding: 18px;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    background-color: #fafafa;
+  }
+
+  .category-choice-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,
+        minmax(min(100%, 170px), 1fr));
+    gap: 10px;
+  }
+
+  .category-choice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    padding: 12px 14px;
+    margin: 0;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background-color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .category-choice:hover {
+    background-color: #f0fdf4;
+    border-color: #198754;
+  }
+
+  .category-choice input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    margin: 0;
+    accent-color: #198754;
+    cursor: pointer;
+  }
+
+  .category-choice span {
+    line-height: 1.4;
+    word-break: keep-all;
+  }
+
+  .signup-submit {
+    min-height: 48px;
+    border-radius: 8px;
+    font-weight: 600;
+  }
+
+  @media (max-width: 480px) {
+    .category-choice-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="container py-5">
+
+  <div class="signup-container">
+
+    <div class="card signup-card shadow-sm">
+
+      <div class="card-body p-4 p-md-5">
+
+        <!-- 제목 -->
+        <div class="text-center mb-4">
+
+          <h2 class="fw-bold">
+            회원가입
+          </h2>
+
+          <p class="text-muted mt-2">
+            ThRead와 함께 나만의 독서 기록을 시작해 보세요.
+          </p>
+
+        </div>
+
+
+        <!-- 회원가입 Form -->
+        <form action="{% url 'accounts:signup' %}" method="POST" enctype="multipart/form-data">
+
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+          <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+          </div>
+          {% endif %}
+
+
+          {% for field in form %}
+
+          <div class="mb-4">
+
+            {% if field.name == 'categories' %}
+
+            <!-- 선호 장르 선택 영역 -->
+            <div class="category-section">
+
+              <div class="fw-semibold mb-3">
+                {{ field.label }}
+
+                <span class="text-muted small fw-normal">
+                  (복수 선택 가능)
+                </span>
+              </div>
+
+              <div class="category-choice-grid">
+
+                {% for checkbox in field %}
+
+                <label class="category-choice">
+
+                  {{ checkbox.tag }}
+
+                  <span>
+                    {{ checkbox.choice_label }}
+                  </span>
+
+                </label>
+
+                {% empty %}
+
+                <p class="text-muted small">
+                  등록된 카테고리가 없습니다.
+                </p>
+
+                {% endfor %}
+
+              </div>
+
+            </div>
+
+            {% else %}
+
+            <!-- 일반 입력 영역 -->
+            <label for="{{ field.id_for_label }}" class="form-label fw-semibold">
+              {{ field.label }}
+            </label>
+
+            {{ field }}
+
+            {% endif %}
+
+
+            <!-- 안내 문구 -->
+            {% if field.help_text %}
+            <div class="form-text mt-1">
+              {{ field.help_text }}
+            </div>
+            {% endif %}
+
+
+            <!-- 필드 오류 -->
+            {% for error in field.errors %}
+
+            <div class="text-danger small mt-1">
+              {{ error }}
+            </div>
+
+            {% endfor %}
+
+          </div>
+
+          {% endfor %}
+
+
+          <!-- 회원가입 버튼 -->
+          <button type="submit" class="btn btn-success w-100 signup-submit mt-2">
+            회원가입
+          </button>
+
+        </form>
+
+
+        <hr class="my-4">
+
+
+        <!-- 로그인 이동 -->
+        <p class="text-center mb-0">
+
+          이미 계정이 있으신가요?
+
+          <a href="{% url 'accounts:login' %}" class="text-success fw-semibold text-decoration-none">
+            로그인하기
+          </a>
+
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock content %}

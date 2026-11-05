@@ -133,3 +133,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 AUTH_USER_MODEL = 'accounts.User'                 # F402: Custom User 모델 등록
 GMS_API_KEY = os.getenv('GMS_API_KEY', '')        # F417: GMS API Key 환경변수
+GMS_BASE_URL = os.getenv(
+    'GMS_BASE_URL',
+    'https://gms.ssafy.io/gmsapi/api.openai.com/v1/'
+)

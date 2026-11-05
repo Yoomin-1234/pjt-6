@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+  <!-- 프로필 기본 정보 -->
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-4">
+
+      <div class="row align-items-center">
+
+        <!-- 프로필 사진 -->
+        <div class="col-md-3 text-center mb-3">
+
+          {% if person.profile_img %}
+          <img src="{{ person.profile_img.url }}" alt="프로필 사진" class="rounded-circle img-fluid"
+            style="width: 150px; height: 150px; object-fit: cover;">
+          {% else %}
+          <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center mx-auto"
+            style="width: 150px; height: 150px; font-size: 50px;">
+            {{ person.username|first|upper }}
+          </div>
+          {% endif %}
+
+        </div>
+
+        <!-- 사용자 정보 -->
+        <div class="col-md-9">
+
+          <h2 class="fw-bold">
+            {{ person.username }}
+          </h2>
+
+          <p class="text-muted">
+            {{ person.first_name }} {{ person.last_name }}
+          </p>
+
+          <div class="d-flex gap-4 mb-3">
+
+            <div>
+              <strong>{{ followers_count }}</strong>
+              <span class="text-muted">팔로워</span>
+            </div>
+
+            <div>
+              <strong>{{ followings_count }}</strong>
+              <span class="text-muted">팔로잉</span>
+            </div>
+
+            <div>
+              <strong>{{ threads.count }}</strong>
+              <span class="text-muted">쓰레드</span>
+            </div>
+
+          </div>
+
+          <hr>
+
+          <p>
+            <strong>이메일:</strong>
+            {{ person.email|default:"미입력" }}
+          </p>
+
+          <p>
+            <strong>성별:</strong>
+            {{ person.get_gender_display|default:"미입력" }}
+          </p>
+
+          <p>
+            <strong>나이:</strong>
+            {% if person.age != None %}
+            {{ person.age }}세
+            {% else %}
+            미입력
+            {% endif %}
+          </p>
+
+          <p>
+            <strong>주간 평균 독서 시간:</strong>
+            {% if person.weekly_reading_time != None %}
+            {{ person.weekly_reading_time }}시간
+            {% else %}
+            미입력
+            {% endif %}
+          </p>
+
+          <p>
+            <strong>연간 독서량:</strong>
+            {% if person.annual_reading_count != None %}
+            {{ person.annual_reading_count }}권
+            {% else %}
+            미입력
+            {% endif %}
+          </p>
+
+        </div>
+      </div>
+
+      <!-- 선호 장르 -->
+      <hr>
+
+      <h5 class="fw-bold mb-3">선호 장르</h5>
+
+      {% for category in person.categories.all %}
+      <span class="badge bg-success me-1 mb-1 p-2">
+        {{ category.name }}
+      </span>
+      {% empty %}
+      <span class="text-muted">
+        등록된 선호 장르가 없습니다.
+      </span>
+      {% endfor %}
+
+      <hr>
+
+      <!-- 본인이 아닌 사용자에게 표시되는 팔로우 버튼 -->
+      {% if request.user.is_authenticated and request.user != person %}
+
+      <form action="{% url 'accounts:follow' person.pk %}" method="POST">
+        {% csrf_token %}
+
+        {% if is_following %}
+        <button type="submit" class="btn btn-outline-success">
+          언팔로우
+        </button>
+        {% else %}
+        <button type="submit" class="btn btn-success">
+          팔로우
+        </button>
+        {% endif %}
+
+      </form>
+
+      {% endif %}
+
+      <!-- 본인 프로필에만 표시되는 관리 버튼 -->
+      {% if request.user == person %}
+
+      <div class="d-flex gap-2 mt-3">
+
+        <a href="{% url 'accounts:update' %}" class="btn btn-outline-primary">
+          회원정보 수정
+        </a>
+
+        <a href="{% url 'accounts:change_password' %}" class="btn btn-outline-secondary">
+          비밀번호 변경
+        </a>
+
+        <form action="{% url 'accounts:delete' %}" method="POST" onsubmit="return confirm('정말 회원탈퇴하시겠습니까?');">
+          {% csrf_token %}
+
+          <button type="submit" class="btn btn-outline-danger">
+            회원탈퇴
+          </button>
+
+        </form>
+
+      </div>
+
+      {% endif %}
+
+    </div>
+  </div>
+
+
+  <!-- 작성한 쓰레드 목록 -->
+  <div class="mb-4">
+
+    <h3 class="fw-bold mb-3">
+      작성한 쓰레드
+    </h3>
+
+    <div class="row">
+
+      {% for thread in threads %}
+
+      <div class="col-md-6 mb-3">
+
+        <div class="card h-100 shadow-sm">
+
+          <div class="card-body">
+
+            <h5 class="card-title fw-bold">
+              <a href="{% url 'books:thread_detail' thread.book.pk thread.pk %}" class="text-decoration-none text-dark">
+                {{ thread.title }}
+              </a>
+            </h5>
+
+            <p class="text-muted small">
+              도서: {{ thread.book.title }}
+            </p>
+
+            <p class="card-text">
+              {{ thread.content|truncatechars:100 }}
+            </p>
+
+            <div class="d-flex justify-content-between text-muted small">
+
+              <span>
+                독서일: {{ thread.reading_date }}
+              </span>
+
+              <span>
+                좋아요 {{ thread.likes.count }}
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      {% empty %}
+
+      <div class="col-12">
+        <div class="alert alert-light text-center">
+          아직 작성한 쓰레드가 없습니다.
+        </div>
+      </div>
+
+      {% endfor %}
+
+    </div>
+
+  </div>
+
+  <a href="{% url 'books:index' %}" class="btn btn-secondary">
+    메인으로 돌아가기
+  </a>
+
+</div>
+
+{% endblock content %}

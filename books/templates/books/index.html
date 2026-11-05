@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+  <!-- 페이지 제목 -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+      <h2 class="fw-bold">도서 목록</h2>
+      <p class="text-muted">
+        다양한 도서를 둘러보고 독서 기록을 시작해 보세요.
+      </p>
+    </div>
+
+    {% if request.user.is_authenticated %}
+    <a href="{% url 'books:create' %}" class="btn btn-success">
+      + 도서 등록
+    </a>
+    {% endif %}
+
+  </div>
+
+
+  <!-- 카테고리 필터 -->
+  <div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-body">
+
+      <form method="GET" action="{% url 'books:index' %}">
+
+        <div class="row align-items-end">
+
+          <div class="col-md-9 mb-2">
+
+            <label class="form-label fw-bold">
+              도서 카테고리
+            </label>
+
+            <select name="category" class="form-select">
+
+              <option value="" {% if not selected_category_id %}selected{% endif %}>
+                전체 도서
+              </option>
+
+              {% for category in categories %}
+
+              <option value="{{ category.pk }}" {% if selected_category_id == category.pk %}selected{% endif %}>
+                {{ category.name }}
+              </option>
+
+              {% endfor %}
+
+
+            </select>
+
+          </div>
+
+          <div class="col-md-3 mb-2">
+
+            <button type="submit" class="btn btn-success w-100">
+              필터 적용
+            </button>
+
+          </div>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+  <!-- 도서 개수 -->
+  <div class="mb-3">
+
+    <h5 class="fw-bold">
+      총 {{ books.count }}권의 도서
+    </h5>
+
+  </div>
+
+
+  <!-- 도서 목록 -->
+  <div class="row">
+
+    {% for book in books %}
+
+    <div class="col-md-6 col-lg-4 mb-4">
+
+      <div class="card h-100 shadow-sm border-0">
+
+        <div class="card-body">
+
+          <!-- 카테고리 -->
+          {% if book.category %}
+          <span class="badge bg-success mb-2">
+            {{ book.category.name }}
+          </span>
+          {% else %}
+          <span class="badge bg-secondary mb-2">
+            미분류
+          </span>
+          {% endif %}
+
+          <!-- 제목 -->
+          <h5 class="card-title fw-bold">
+            <a href="{% url 'books:detail' book.pk %}" class="text-decoration-none text-dark">
+              {{ book.title }}
+            </a>
+          </h5>
+
+          <!-- 저자 -->
+          <p class="text-muted mb-2">
+            저자: {{ book.author }}
+          </p>
+
+          <!-- 설명 -->
+          <p class="card-text">
+            {{ book.description|truncatechars:100 }}
+          </p>
+
+          <hr>
+
+          <!-- 평점 -->
+          <p class="small mb-2">
+            회원 리뷰 평점:
+            <strong>
+              {{ book.customer_review_rank }} / 10
+            </strong>
+          </p>
+
+          <!-- 등록자 -->
+          <p class="text-muted small mb-3">
+            등록자: {{ book.user.username }}
+          </p>
+
+          <!-- 상세 페이지 -->
+          <a href="{% url 'books:detail' book.pk %}" class="btn btn-outline-success w-100">
+            도서 상세 보기
+          </a>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    {% empty %}
+
+    <div class="col-12">
+
+      <div class="alert alert-light text-center py-5">
+
+        <h5>등록된 도서가 없습니다.</h5>
+
+        <p class="text-muted mb-0">
+          다른 카테고리를 선택하거나 새로운 도서를 등록해 보세요.
+        </p>
+
+      </div>
+
+    </div>
+
+    {% endfor %}
+
+  </div>
+
+</div>
+
+{% endblock content %}
