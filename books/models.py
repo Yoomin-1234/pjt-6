@@ -44,3 +44,17 @@ class Book(models.Model):                  # F604 & F625: Book 모델
 #     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='comments')
 #     content = models.CharField(max_length=200)
 #     created_at = models.DateTimeField(auto_now_add=True)
+
+class Comment(models.Model):          # F627: 쓰레드 댓글 모델
+    thread = models.ForeignKey(
+        'books.Thread',
+        on_delete=models.CASCADE,
+        related_name='comments',
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='comments',
+    )
+    content = models.CharField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
